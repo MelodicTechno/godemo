@@ -3,9 +3,8 @@ app:
   port: :3000
 
 database:
-  host: localhost
-  port: 3306
-  user: your_username
-  password: your_password
-  name: currency_excange_db
+  dsn: root:!CSnick040112@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local
+  MaxIdleConns: 11
+  MaxOpenConns: 114
+  
 
