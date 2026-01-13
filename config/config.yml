@@ -3,8 +3,9 @@ app:
   port: :3000
 
 database:
-  dsn: root:!CSnick040112@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local
+  # remote version
+  # dsn: root:!CSnick040112@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local
+  # local version
+  dsn: root:123456@tcp(127.0.0.1:3306)/exchangeapp?charset=utf8mb4&parseTime=True&loc=Local 
   MaxIdleConns: 11
   MaxOpenConns: 114
-  
-
