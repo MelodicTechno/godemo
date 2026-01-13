@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_DSN=root:123456@tcp(db:3306)/exchangeapp?charset=utf8mb4&parseTime=True&loc=Local
+      - APP_PORT=:3000
+    networks:
+      - exchange-network
+    restart: always
+
+  db:
+    image: mysql:8.0
+    container_name: exchange-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=exchangeapp
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p123456 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - exchange-network
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: exchange-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - exchange-network
+    restart: always
+
+networks:
+  exchange-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  redis_data:

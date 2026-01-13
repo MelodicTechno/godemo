@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -25,6 +26,11 @@ func InitConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 	viper.AddConfigPath("./config")
+
+	// Enable environment variables
+	viper.AutomaticEnv()
+	// Replace dots with underscores in env variables (e.g. DATABASE_DSN -> database.dsn)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %v", err)
