@@ -19,6 +19,14 @@ func CreateArticle(ctx *gin.Context) {
 		return
 	}
 
+	if article.Preview == "" {
+		content := article.Content
+		if len(content) > 120 {
+			content = content[:120]
+		}
+		article.Preview = content
+	}
+
 	if err := global.Db.AutoMigrate(&models.Article{}); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
