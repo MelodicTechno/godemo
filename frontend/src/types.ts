@@ -1,9 +1,10 @@
 export interface Article {
-  id: number;
-  title: string;
-  content: string;
-  author: string;
-  created_at?: string;
+  ID: number;
+  Title: string;
+  Content: string;
+  Author?: string;
+  CreatedAt?: string;
+  Likes?: number;
 }
 
 export interface ExchangeRate {

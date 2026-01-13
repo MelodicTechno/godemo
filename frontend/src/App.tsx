@@ -74,8 +74,8 @@ export default function App() {
       await Promise.all(
         data.map(async (article) => {
           try {
-            const res = await getArticleLikes(token, article.id);
-            likesMap[article.id] = res.likes;
+            const res = await getArticleLikes(token, article.ID);
+            likesMap[article.ID] = res.likes;
           } catch {
             // ignore
           }
@@ -322,46 +322,64 @@ export default function App() {
                   {feedError}
                 </div>
               )}
-              <div>
+              <div className="flex-1 overflow-y-auto">
                 {articles.map((article) => (
                   <article
-                    key={article.id}
-                    className="border-b border-slate-800 px-4 py-3 hover:bg-slate-900/50 transition-colors"
+                    key={article.ID}
+                    className="border-b border-slate-800 p-4 hover:bg-white/[0.02] transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-semibold">
-                        {article.author || "匿名"}
-                      </span>
-                      <span className="text-[11px] text-slate-500">
-                        #{article.id}
-                      </span>
-                    </div>
-                    <div className="text-sm font-semibold mb-1">
-                      {article.title}
-                    </div>
-                    <div className="text-sm text-slate-100 whitespace-pre-line mb-2">
-                      {article.content}
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-slate-400">
-                      <button
-                        type="button"
-                        onClick={() => handleLike(article.id)}
-                        className="flex items-center gap-1 hover:text-sky-400"
-                      >
-                        <span>♥</span>
-                        <span>赞</span>
-                      </button>
-                      <span>
-                        {likes[article.id]
-                          ? `${likes[article.id]} 个赞`
-                          : "还没有人点赞"}
-                      </span>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 font-medium">
+                          {(article.Author?.[0] || "U").toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-slate-200 truncate">
+                            {article.Author || "Unknown"}
+                          </span>
+                          <span className="text-slate-500 text-sm">
+                            · {new Date(article.CreatedAt || "").toLocaleDateString()}
+                          </span>
+                        </div>
+                        <h3 className="text-base font-semibold text-slate-200 mb-1 leading-snug">
+                          {article.Title}
+                        </h3>
+                        <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                          {article.Content}
+                        </p>
+
+                        <div className="flex items-center gap-6 mt-3 text-slate-500 text-sm">
+                          <button
+                            onClick={() => handleLike(article.ID)}
+                            className="flex items-center gap-1.5 hover:text-pink-500 transition-colors group"
+                          >
+                            <div className="p-1.5 -ml-1.5 rounded-full group-hover:bg-pink-500/10 transition-colors">
+                              ♥
+                            </div>
+                            <span>{likes[article.ID] || article.Likes || 0}</span>
+                          </button>
+                          <button className="flex items-center gap-1.5 hover:text-sky-500 transition-colors group">
+                            <div className="p-1.5 -ml-1.5 rounded-full group-hover:bg-sky-500/10 transition-colors">
+                              💬
+                            </div>
+                            <span>0</span>
+                          </button>
+                          <button className="flex items-center gap-1.5 hover:text-emerald-500 transition-colors group">
+                            <div className="p-1.5 -ml-1.5 rounded-full group-hover:bg-emerald-500/10 transition-colors">
+                              ⚡
+                            </div>
+                            <span>0</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </article>
                 ))}
-                {!feedLoading && articles.length === 0 && (
-                  <div className="px-4 py-6 text-sm text-slate-500">
-                    暂时还没有内容，发一条试试？
+                {articles.length === 0 && !feedLoading && (
+                  <div className="py-20 text-center text-slate-500">
+                    暂无内容，快来发布第一条吧
                   </div>
                 )}
               </div>
