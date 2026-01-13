@@ -9,6 +9,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(middlewares.CORSMiddleware())
 	auth := r.Group("/api/auth") 
 	{
 		auth.POST("/login", controllers.Login)
