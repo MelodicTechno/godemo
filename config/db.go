@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDB() {
+func initDB() {
 	dsn := AppConfig.Database.Dsn
 	var db *gorm.DB
 	var err error
