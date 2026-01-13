@@ -7,5 +7,5 @@ import (
 
 var (
 	Db *gorm.DB
-	Redis *redis.Client
+	RedisDB *redis.Client
 )

@@ -18,5 +18,5 @@ func initRedis() {
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis, got error: %v", err)
 	}
-	global.Redis = RedisClient
+	global.RedisDB = RedisClient
 }
