@@ -1,8 +1,7 @@
 import type { Article, ExchangeRate } from "./types";
 
 const API_BASE =
-  (import.meta.env.VITE_API_BASE as string | undefined) ??
-  "http://localhost:8080";
+  (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${path}`;
