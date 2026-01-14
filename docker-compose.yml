@@ -51,7 +51,7 @@ services:
     image: redis:alpine
     container_name: exchange-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
