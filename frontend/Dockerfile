@@ -7,10 +7,14 @@ COPY tsconfig.json ./
 COPY postcss.config.cjs ./
 COPY tailwind.config.cjs ./
 COPY index.html ./
+
+# Install dependencies first (better caching)
+RUN npm ci
+
 COPY src ./src
 COPY public ./public
 
-RUN npm ci && npm run build
+RUN npm run build
 
 FROM nginx:alpine
 
