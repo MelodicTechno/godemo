@@ -1,7 +1,16 @@
-import type { Article, ExchangeRate } from "./types";
+import type { Article, ExchangeRate, CreateArticlePayload } from "./types";
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
+
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = "ApiError";
+  }
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${path}`;
@@ -15,7 +24,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || res.statusText);
+    throw new ApiError(text || res.statusText, res.status);
   }
 
   return (await res.json()) as T;
@@ -45,7 +54,7 @@ export async function getArticles(token: string) {
 
 export async function createArticle(
   token: string,
-  data: Pick<Article, "title" | "content" | "author">
+  data: CreateArticlePayload
 ) {
   return request<Article>("/api/articles", {
     method: "POST",

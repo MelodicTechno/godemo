@@ -7,6 +7,12 @@ export interface Article {
   Likes?: number;
 }
 
+export interface CreateArticlePayload {
+  title: string;
+  content: string;
+  author: string;
+}
+
 export interface ExchangeRate {
   id: number;
   base_currency: string;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import {
   createArticle,
   getArticles,
@@ -7,15 +8,16 @@ import {
   likeArticle,
   login,
   register,
+  ApiError,
 } from "./api";
 import type { Article, ExchangeRate } from "./types";
 
-type View = "feed" | "rates";
 type AuthMode = "login" | "register";
 
 function useAuthToken() {
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem("token");
+    const t = localStorage.getItem("token");
+    return t === "null" || t === "undefined" ? null : t;
   });
 
   const updateToken = (value: string | null) => {
@@ -32,7 +34,6 @@ function useAuthToken() {
 
 export default function App() {
   const { token, setToken } = useAuthToken();
-  const [view, setView] = useState<View>("feed");
   const [authMode, setAuthMode] = useState<AuthMode>("login");
 
   const [username, setUsername] = useState("");
@@ -83,6 +84,10 @@ export default function App() {
       );
       setLikes(likesMap);
     } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        setToken(null);
+        return;
+      }
       setFeedError(err instanceof Error ? err.message : "加载失败");
     } finally {
       setFeedLoading(false);
@@ -150,86 +155,82 @@ export default function App() {
     }
   }
 
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
-        <div className="max-w-md w-full px-8 py-10 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-2xl">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center text-xl">
-              x
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              Exchange Timeline
-            </span>
+  const AuthView = (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
+      <div className="max-w-md w-full px-8 py-10 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-2xl">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center text-xl">
+            x
           </div>
-
-          <div className="flex mb-6 border-b border-slate-800">
-            <button
-              type="button"
-              className={`flex-1 py-2 text-sm font-medium ${
-                authMode === "login"
-                  ? "text-sky-400 border-b-2 border-sky-500"
-                  : "text-slate-400"
-              }`}
-              onClick={() => setAuthMode("login")}
-            >
-              登录
-            </button>
-            <button
-              type="button"
-              className={`flex-1 py-2 text-sm font-medium ${
-                authMode === "register"
-                  ? "text-sky-400 border-b-2 border-sky-500"
-                  : "text-slate-400"
-              }`}
-              onClick={() => setAuthMode("register")}
-            >
-              注册
-            </button>
-          </div>
-
-          <form className="space-y-4" onSubmit={handleAuthSubmit}>
-            <div className="space-y-1.5">
-              <label className="text-sm text-slate-300">用户名</label>
-              <input
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="输入用户名"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm text-slate-300">密码</label>
-              <input
-                type="password"
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="输入密码"
-              />
-            </div>
-            {authError && (
-              <div className="text-xs text-red-400 whitespace-pre-line">
-                {authError}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={authLoading}
-              className="w-full mt-2 rounded-full bg-sky-500 hover:bg-sky-600 transition-colors py-2 text-sm font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {authMode === "login" ? "登录" : "注册"}
-            </button>
-          </form>
+          <span className="text-lg font-semibold tracking-tight">
+            Exchange Timeline
+          </span>
         </div>
+        <div className="flex mb-6 border-b border-slate-800">
+          <button
+            type="button"
+            className={`flex-1 py-2 text-sm font-medium ${
+              authMode === "login"
+                ? "text-sky-400 border-b-2 border-sky-500"
+                : "text-slate-400"
+            }`}
+            onClick={() => setAuthMode("login")}
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-2 text-sm font-medium ${
+              authMode === "register"
+                ? "text-sky-400 border-b-2 border-sky-500"
+                : "text-slate-400"
+            }`}
+            onClick={() => setAuthMode("register")}
+          >
+            注册
+          </button>
+        </div>
+        <form className="space-y-4" onSubmit={handleAuthSubmit}>
+          <div className="space-y-1.5">
+            <label className="text-sm text-slate-300">用户名</label>
+            <input
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="输入用户名"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-slate-300">密码</label>
+            <input
+              type="password"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="输入密码"
+            />
+          </div>
+          {authError && (
+            <div className="text-xs text-red-400 whitespace-pre-line">
+              {authError}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={authLoading}
+            className="w-full mt-2 rounded-full bg-sky-500 hover:bg-sky-600 transition-colors py-2 text-sm font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {authMode === "login" ? "登录" : "注册"}
+          </button>
+        </form>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
-      <div className="max-w-6xl mx-auto flex">
-        {/* Left sidebar */}
+      {token ? (
+        <div className="max-w-6xl mx-auto flex">
         <aside className="hidden md:flex flex-col w-64 border-r border-slate-800 px-4 py-4 gap-4 sticky top-0 h-screen">
           <div className="flex items-center gap-2 px-2 mb-2">
             <div className="h-9 w-9 rounded-full bg-sky-500 flex items-center justify-center text-xl">
@@ -240,24 +241,12 @@ export default function App() {
             </span>
           </div>
           <nav className="space-y-1 text-sm">
-            <button
-              type="button"
-              onClick={() => setView("feed")}
-              className={`flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-900 ${
-                view === "feed" ? "font-semibold text-sky-400" : ""
-              }`}
-            >
+            <Link to="/feed" className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-900">
               <span>首页</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("rates")}
-              className={`flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-900 ${
-                view === "rates" ? "font-semibold text-sky-400" : ""
-              }`}
-            >
+            </Link>
+            <Link to="/rates" className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-900">
               <span>汇率</span>
-            </button>
+            </Link>
           </nav>
           <button
             type="button"
@@ -268,15 +257,15 @@ export default function App() {
           </button>
         </aside>
 
-        {/* Main */}
         <main className="flex-1 border-r border-slate-800 min-h-screen">
-          {view === "feed" ? (
-            <>
+          <Routes>
+            <Route path="/" element={<Navigate to="/feed" replace />} />
+            <Route path="/feed" element={
+              <>
               <div className="border-b border-slate-800 px-4 py-3 font-semibold text-lg">
                 首页
               </div>
 
-              {/* composer */}
               <form
                 className="border-b border-slate-800 px-4 py-3 space-y-3"
                 onSubmit={handlePostArticle}
@@ -311,7 +300,6 @@ export default function App() {
                 </div>
               </form>
 
-              {/* feed */}
               {feedLoading && (
                 <div className="px-4 py-4 text-sm text-slate-400">
                   正在加载时间线...
@@ -383,9 +371,10 @@ export default function App() {
                   </div>
                 )}
               </div>
-            </>
-          ) : (
-            <>
+              </>
+            } />
+            <Route path="/rates" element={
+              <>
               <div className="border-b border-slate-800 px-4 py-3 font-semibold text-lg">
                 汇率
               </div>
@@ -422,11 +411,12 @@ export default function App() {
                   )}
                 </div>
               </div>
-            </>
-          )}
+              </>
+            } />
+            <Route path="*" element={<Navigate to="/feed" replace />} />
+          </Routes>
         </main>
 
-        {/* Right sidebar */}
         <aside className="hidden lg:block w-80 px-4 py-4 space-y-4">
           <div className="rounded-2xl bg-slate-900/80 border border-slate-800 px-4 py-3">
             <h2 className="text-sm font-semibold mb-2">汇率一览</h2>
@@ -450,7 +440,13 @@ export default function App() {
             </div>
           </div>
         </aside>
-      </div>
+        </div>
+      ) : (
+        <Routes>
+          <Route path="/login" element={AuthView} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      )}
     </div>
   );
 }
